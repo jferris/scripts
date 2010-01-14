@@ -1,0 +1,3 @@
+#!/bin/sh
+
+git status | grep unmerged | sed "s/^.*unmerged: *//" | head -n 1

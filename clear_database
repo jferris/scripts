@@ -1,0 +1,9 @@
+#!/usr/bin/ruby
+
+ENV['RAILS_ENV'] ||= 'test'
+require 'config/environment'
+
+connection = ActiveRecord::Base.connection
+(connection.tables - %w(schema_migrations)).each do |table_name|
+  connection.execute("DELETE FROM #{table_name}")
+end

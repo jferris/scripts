@@ -1,0 +1,21 @@
+#!/usr/bin/ruby
+
+unless failing_feature = ARGV[0]
+  puts "Usage: find-interacting-feature <feature_file>"
+  exit
+end
+
+other_features = Dir["features/**/*.feature"] - [failing_feature]
+
+interacting_feature = other_features.detect do |other_feature|
+  command = "./script/cucumber #{other_feature} #{failing_feature}"
+  puts "Running after #{other_feature}"
+  `#{command} 2>&1`
+  $? != 0
+end
+
+if interacting_feature
+  puts "Fails when run after #{interacting_feature}"
+else
+  puts "No interacting features found"
+end
