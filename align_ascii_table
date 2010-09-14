@@ -1,25 +1,52 @@
 #!/usr/bin/env ruby
+
+class Array
+  def split_on
+    head   = []
+    body   = []
+    tail   = []
+    target = head
+    i = 0
+    while i < size
+      item = at(i)
+      if target.equal?(head) && yield(item)
+        target = body
+      elsif target.equal?(body) && !yield(item)
+        target = tail
+      end
+      target << item
+      i += 1
+    end
+    [head, body, tail]
+  end
+end
+
 lines = STDIN.readlines
-leading_match = lines.first.match(/^\s+/)
-leading = leading_match ? leading_match[0] : ''
-lines_without_edges = lines.map { |line| line.strip.sub(/^\|/, '').sub(/\|$/, '') }
-lines_without_edges.reject! { |line| line.empty? }
-table = lines_without_edges.map { |line| line.split('|').map { |cell| cell.strip } }
-cell_count = table.first.size
-widths = (0...cell_count).map do |index|
-  table.inject(0) do |result, row|
-    size = row[index].size
-    size > result ? size : result
+leading_lines, lines, trailing_lines = lines.split_on { |line| line.include?('|') }
+puts leading_lines
+unless lines.empty?
+  leading_match = lines.first.match(/^\s+/)
+  leading = leading_match ? leading_match[0] : ''
+  lines_without_edges = lines.map { |line| line.strip.sub(/^\|/, '').sub(/\|$/, '') }
+  lines_without_edges.reject! { |line| line.empty? }
+  table = lines_without_edges.map { |line| line.split('|').map { |cell| cell.strip } }
+  cell_count = table.first.size
+  widths = (0...cell_count).map do |index|
+    table.inject(0) do |result, row|
+      size = row[index].size
+      size > result ? size : result
+    end
   end
-end
-aligned_table = table.map do |row|
-  result = []
-  row.each_with_index do |cell, index|
-    result << cell.ljust(widths[index])
+  aligned_table = table.map do |row|
+    result = []
+    row.each_with_index do |cell, index|
+      result << cell.ljust(widths[index] || 0)
+    end
+    result
   end
-  result
+  aligned_lines = aligned_table.map do |row|
+    leading + '| ' + row.join(" | ") + ' |'
+  end
+  puts aligned_lines.join("\n")
 end
-aligned_lines = aligned_table.map do |row|
-  leading + '| ' + row.join(" | ") + ' |'
-end
-puts aligned_lines.join("\n")
+puts trailing_lines
