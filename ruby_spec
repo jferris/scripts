@@ -65,7 +65,9 @@ class SpecFinder
   end
 
   def script_to_run
-    if File.exist?("script/spec")
+    if File.exist?("Gemfile")
+      "bundle exec rspec"
+    elsif File.exist?("script/spec")
       "script/spec"
     else
       "spec"
